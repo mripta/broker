@@ -1,0 +1,19 @@
+{
+  "name": "broker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aedes": "^0.40.1",
+    "dotenv": "^8.2.0",
+    "http": "0.0.0",
+    "mqemitter-mongodb": "^7.0.0",
+    "net": "^1.0.2",
+    "websocket-stream": "^5.5.0"
+  }
+}
