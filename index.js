@@ -1,7 +1,6 @@
 let httpServer = require('http').createServer();
 let mqmongo = require('mqemitter-mongodb');
 let ws = require('websocket-stream');
-let Promise = require('promise');
 let bcrypt = require('bcryptjs');
 let mysql = require('mysql');
 require('dotenv').config();
@@ -43,43 +42,35 @@ httpServer.listen(process.env.WS_PORT, function () {
     console.log('websocket server listening on port:', process.env.WS_PORT)
 });
 
+// authentication
 aedes.authenticate = function(client, username, password, callback) {
+    const mqerr = new Error('Auth error');
+    mqerr.returnCode = 4;
     console.log('Client connected. Waiting login...');
-    var promise = new Promise(function(resolve,reject){
-        mysql.query('SELECT password FROM users WHERE email = ?',[username], function (error, results, fields) {
-            if(error){
-                console.log("MySQL error:", error);
-                reject();return;
-            }
-            if(results.length>0){
-                // async method to check the password
-                (async () =>{
-                    bcrypt.compare(password.toString(), results[0].password.toString(), function(err, res) {
-                        if (err) throw err;
-                        if(res) {
-                            console.log("User", username, "logged in...");
-                            resolve();
-                        } else {
-                            // Wrong Password
-                            console.log("Wrong password...");
-                            reject();
-                        }
-                    });
-                })(); 
-    
+    mysql.query('SELECT password FROM users WHERE email = ?',[username], function (error, results, fields) {
+        if(error){
+            console.log("MySQL error:", error);
+            callback(mqerr,null);
+        } else {
+            if(results.length > 0){
+                // compare password
+                bcrypt.compare(password.toString(), results[0].password.toString(), function(err, res) {
+                    if (err) throw err;
+                    if(res) {
+                        console.log("User", username, "logged in...");
+                        callback(null,true);
+                    } else {
+                        // Wrong Password
+                        console.log("Wrong password...");
+                        callback(mqerr,null);
+                    }
+                });
             } else{
                 // User doesn't exist
                 console.log("User doesn't exist...");
-                reject();
+                callback(mqerr,null);
             }
-        });
-    });
-    promise.then(function(){
-        // Authenticate
-        callback(null,true);
-    }).catch(function(){
-        // Reject
-        callback(null,false);
+        }
     });
 }
 
@@ -88,11 +79,11 @@ aedes.on("clientDisconnect",function(client){
 });
 
 aedes.on('clientError', function (client, err) {
-    console.log('client error: ', client.id, err.message, err.stack);
+    console.log('client error: ', client.id);
 });
 
 aedes.on('connectionError', function (client, err) {
-    console.log('connection error: ', client, err.message, err.stack);
+    console.log('connection error: ', client);
 });
 
 aedes.on('publish', function (packet, client) {

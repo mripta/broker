@@ -28,10 +28,10 @@
     "bcryptjs": "^2.4.3",
     "dotenv": "^8.2.0",
     "http": "0.0.0",
+    "mongodb": "^3.5.3",
     "mqemitter-mongodb": "^7.0.0",
     "mysql": "^2.18.1",
     "net": "^1.0.2",
-    "promise": "^8.0.3",
     "websocket-stream": "^5.5.0"
   }
 }
