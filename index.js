@@ -1,7 +1,8 @@
-let httpServer = require('http').createServer();
-let mqmongo = require('mqemitter-mongodb');
-let ws = require('websocket-stream');
-let bcrypt = require('bcryptjs');
+const MongoClient = require('mongodb').MongoClient;
+const httpServer = require('http').createServer();
+const mqmongo = require('mqemitter-mongodb');
+const ws = require('websocket-stream');
+const bcrypt = require('bcryptjs');
 let mysql = require('mysql');
 require('dotenv').config();
 
@@ -20,11 +21,8 @@ const log = (text) => {
         console.log(`[${new Date().toLocaleString()}] ${text}`)
 }
 
-//Emitter
-let emitter = mqmongo({url: process.env.MONGO_URL});
-
 //Aedes Server
-let aedes = require("aedes")({mq: emitter});
+let aedes = require("aedes")({id: process.env.SERVER_ID});
 
 let server = require('net').createServer(aedes.handle);
 
@@ -74,30 +72,40 @@ aedes.authenticate = function(client, username, password, callback) {
     });
 }
 
-aedes.on("clientDisconnect",function(client){
-    console.log('client disconnected: ', client.id);
-});
-
-aedes.on('clientError', function (client, err) {
-    console.log('client error: ', client.id);
-});
-
-aedes.on('connectionError', function (client, err) {
-    console.log('connection error: ', client);
-});
-
+// publish
 aedes.on('publish', function (packet, client) {
     if (client) {
         console.log('client: ', client.id, ' published ', packet.payload.toString(), ' on topic ',packet.topic);
+        MongoClient.connect(process.env.MONGO_URL, { useUnifiedTopology: true }, function(err, client) {
+            if (err) throw err;
+            const db = client.db(process.env.MONGO_DB);
+            db.collection(process.env.MONGO_COL).insertOne(packet, function(err, res) {
+                if (err) throw err;
+                client.close();
+            });
+        });
     }
 });
 
+aedes.on("clientDisconnect",function(client){
+    console.log('client disconnected:', client.id);
+});
+
+aedes.on('clientError', function (client, err) {
+    console.log('client error:', client.id);
+});
+
+aedes.on('connectionError', function (client, err) {
+    console.log('connection error:', client);
+});
+
+
 aedes.on('subscribe', function (subscriptions, client) {
     if (client) {
-        console.log('client: ', client.id, ' subscribed ', subscriptions);
+        console.log('client:', client.id, 'subscribed', subscriptions);
     }
 });
 
 aedes.on('client', function (client) {
-    console.log('new client: ', client.id);
+    console.log('new client:', client.id);
 });
