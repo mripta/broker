@@ -6,13 +6,31 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mripta/broker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mripta/broker/issues"
+  },
+  "engines": {
+    "node": ">=10"
+  },
+  "keywords": [
+    "mqtt",
+    "broker",
+    "iot"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "aedes": "^0.40.1",
+    "bcryptjs": "^2.4.3",
     "dotenv": "^8.2.0",
     "http": "0.0.0",
+    "mongodb": "^3.5.3",
     "mqemitter-mongodb": "^7.0.0",
+    "mysql": "^2.18.1",
     "net": "^1.0.2",
     "websocket-stream": "^5.5.0"
   }
