@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "mon": "nodemon index.js",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -24,6 +25,9 @@
   ],
   "author": "",
   "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  },
   "dependencies": {
     "aedes": "^0.40.1",
     "bcryptjs": "^2.4.3",

@@ -1,6 +1,5 @@
 const MongoClient = require('mongodb').MongoClient;
 const httpServer = require('http').createServer();
-const mqmongo = require('mqemitter-mongodb');
 const ws = require('websocket-stream');
 const bcrypt = require('bcryptjs');
 let mysql = require('mysql');
@@ -79,7 +78,7 @@ aedes.on('publish', function (packet, client) {
         MongoClient.connect(process.env.MONGO_URL, { useUnifiedTopology: true }, function(err, client) {
             if (err) throw err;
             const db = client.db(process.env.MONGO_DB);
-            db.collection(process.env.MONGO_COL).insertOne(packet, function(err, res) {
+            db.collection(process.env.MONGO_PUB_COL).insertOne(packet, function(err, res) {
                 if (err) throw err;
                 client.close();
             });
@@ -98,7 +97,6 @@ aedes.on('clientError', function (client, err) {
 aedes.on('connectionError', function (client, err) {
     console.log('connection error:', client);
 });
-
 
 aedes.on('subscribe', function (subscriptions, client) {
     if (client) {
