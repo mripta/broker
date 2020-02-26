@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "aedes": "^0.40.1",
+    "aedes-persistence-mongodb": "^7.0.1",
     "bcryptjs": "^2.4.3",
     "dotenv": "^8.2.0",
     "http": "0.0.0",

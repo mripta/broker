@@ -1,3 +1,4 @@
+const mongoPersistence = require('aedes-persistence-mongodb');
 const MongoClient = require('mongodb').MongoClient;
 const httpServer = require('http').createServer();
 const ws = require('websocket-stream');
@@ -14,14 +15,14 @@ mysql = mysql.createPool({
     database: process.env.MYSQL_DB
 });
 
-// helper function to log date+text to console
-const log = (text) => {
-    if (process.env.DEBUG)
-        console.log(`[${new Date().toLocaleString()}] ${text}`)
-}
-
 //Aedes Server
-let aedes = require("aedes")({id: process.env.SERVER_ID});
+let aedes = require("aedes")({
+    id: process.env.SERVER_ID, // broker id
+    maxClientsIdLength: 35, // override MQTT 3.1.0 clients Id length limit
+    persistence: mongoPersistence({
+        url: process.env.MONGO_URL+process.env.MONGO_PER_DB+"?authSource=admin"
+    })
+});
 
 let server = require('net').createServer(aedes.handle);
 
@@ -38,6 +39,12 @@ ws.createServer({
 httpServer.listen(process.env.WS_PORT, function () { 
     console.log('websocket server listening on port:', process.env.WS_PORT)
 });
+
+// helper function to log date+text to console
+const log = (text) => {
+    if (process.env.DEBUG)
+        console.log(`[${new Date().toLocaleString()}] ${text}`)
+}
 
 // authentication
 aedes.authenticate = function(client, username, password, callback) {
@@ -86,6 +93,13 @@ aedes.on('publish', function (packet, client) {
     }
 });
 
+// subscribe
+aedes.on('subscribe', function (subscriptions, client) {
+    if (client) {
+        console.log('client:', client.id, 'subscribed', subscriptions);
+    }
+});
+
 aedes.on("clientDisconnect",function(client){
     console.log('client disconnected:', client.id);
 });
@@ -96,12 +110,6 @@ aedes.on('clientError', function (client, err) {
 
 aedes.on('connectionError', function (client, err) {
     console.log('connection error:', client);
-});
-
-aedes.on('subscribe', function (subscriptions, client) {
-    if (client) {
-        console.log('client:', client.id, 'subscribed', subscriptions);
-    }
 });
 
 aedes.on('client', function (client) {
