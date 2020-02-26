@@ -1,9 +1,11 @@
 {
   "name": "broker",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
+    "mon": "nodemon index.js",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -23,13 +25,16 @@
   ],
   "author": "",
   "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.2"
+  },
   "dependencies": {
     "aedes": "^0.40.1",
+    "aedes-persistence-mongodb": "^7.0.1",
     "bcryptjs": "^2.4.3",
     "dotenv": "^8.2.0",
     "http": "0.0.0",
     "mongodb": "^3.5.3",
-    "mqemitter-mongodb": "^7.0.0",
     "mysql": "^2.18.1",
     "net": "^1.0.2",
     "websocket-stream": "^5.5.0"
